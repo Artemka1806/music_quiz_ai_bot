@@ -32,7 +32,7 @@ class MusicQuizAI:
             ServerError: If max retries exceeded
         """
         try:
-            prompt = "Generate a music quiz question with 3 answer options. "
+            prompt = "Generate a music quiz question from any era or genre with 3 answer options (1 correct). "
             prompt += """
             Return the response in the following JSON format:
             {
