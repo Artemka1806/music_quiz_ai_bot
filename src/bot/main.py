@@ -4,7 +4,9 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.enums import ParseMode
+from aiogram.types import BotCommand
 
+from src.bot.routers import ALL_ROUTERS
 from src.utils import settings, get_redis
 
 
@@ -13,8 +15,13 @@ async def main():
         token=settings.BOT_TOKEN.get_secret_value(),
         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
-    dp = Dispatcher(storage=RedisStorage(await get_redis()))
+    await bot.set_my_commands(commands=[
+		BotCommand(command="/start", description="Restart bot"),
+		BotCommand(command="/support", description="Contact the developer")
+	])
 
+    dp = Dispatcher(storage=RedisStorage(await get_redis()))
+    dp.include_router(*ALL_ROUTERS)
     await dp.start_polling(
         bot,
         allowed_updates=dp.resolve_used_update_types()
