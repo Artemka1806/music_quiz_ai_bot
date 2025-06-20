@@ -18,10 +18,11 @@ class MusicQuizAI:
         
         self.client = genai.Client(api_key=api_key)
     
-    async def _try_generate_question(self, retry_count: int = 0, max_retries: int = 5) -> AIResponse:
+    async def _try_generate_question(self, genre: Optional[str] = None, retry_count: int = 0, max_retries: int = 5) -> AIResponse:
         """Internal method to try generating a question with retry logic.
 
         Args:
+            genre (Optional[str], optional): Specific music genre for questions. Defaults to None.
             retry_count (int, optional): Current retry attempt. Defaults to 0.
             max_retries (int, optional): Maximum number of retries. Defaults to 3.
 
@@ -32,19 +33,12 @@ class MusicQuizAI:
             ServerError: If max retries exceeded
         """
         try:
-            prompt = "Generate a music quiz question from any era or genre with 3 answer options (1 correct). "
-            prompt += """
-            Return the response in the following JSON format:
-            {
-                "question": "Your question here",
-                "options": [
-                    {"text": "Option 1", "is_correct": true},
-                    {"text": "Option 2", "is_correct": false},
-                    {"text": "Option 3", "is_correct": false},
-                ],
-                "hint": "Optional hint about the correct answer"
-            }
-            """
+            # Update prompt based on genre
+            genre_prompt = f" focusing on {genre} music" if genre else ""
+            prompt = f"Generate a challenging music quiz question{genre_prompt} with 3 answer options. " + \
+                    "Include interesting facts as a hint. Format your response as JSON with the following structure: " + \
+                    '{"question": "...", "options": [{"text": "...", "is_correct": true/false}, ...], "hint": "..."}. ' + \
+                    "Make sure only one option is correct."
             
             response = self.client.models.generate_content(
                 model="gemini-2.5-flash",
@@ -60,13 +54,16 @@ class MusicQuizAI:
         except Exception as e:
             if "503 UNAVAILABLE" in str(e) and retry_count < max_retries:
                 await asyncio.sleep(2 ** retry_count)
-                return await self._try_generate_question(retry_count + 1, max_retries)
+                return await self._try_generate_question(genre, retry_count + 1, max_retries)
             raise
         
-    async def generate_question(self) -> AIResponse:
+    async def generate_question(self, genre: Optional[str] = None) -> AIResponse:
         """Generate a music quiz question with automatic retry on server overload.
+
+        Args:
+            genre (Optional[str], optional): Specific music genre for the question. Defaults to None.
 
         Returns:
             AIResponse: Generated question with answer options
         """
-        return await self._try_generate_question()
+        return await self._try_generate_question(genre)

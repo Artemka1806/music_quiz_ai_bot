@@ -17,6 +17,7 @@ async def main():
     )
     await bot.set_my_commands(commands=[
 		BotCommand(command="/start", description="Restart bot"),
+		BotCommand(command="/genre", description="Set preferred music genre"),
 		BotCommand(command="/support", description="Contact the developer")
 	])
 
