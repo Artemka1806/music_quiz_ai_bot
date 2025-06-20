@@ -2,7 +2,7 @@ from aiogram import Bot, Router, F
 from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message, KeyboardButton
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from src.utils.ai import MusicQuizAI
@@ -50,7 +50,8 @@ async def handle_genre_selection(message: Message, state: FSMContext):
     await state.clear()
     
     await message.answer(
-        f"Great! Your preferred genre is set to {genre}. Use /start to begin the quiz with this genre!"
+        f"Great! Your preferred genre is set to {genre}. Use /start to begin the quiz with this genre!",
+        reply_markup=ReplyKeyboardRemove()
     )
 
 
@@ -71,7 +72,8 @@ async def handle_custom_genre(message: Message, state: FSMContext):
     await state.clear()
     
     await message.answer(
-        f"Great! Your preferred genre is set to {genre}. Use /start to begin the quiz with this genre!"
+        f"Great! Your preferred genre is set to {genre}. Use /start to begin the quiz with this genre!",
+        reply_markup=ReplyKeyboardRemove()
     )
 
 
@@ -119,4 +121,7 @@ async def support_command_handler(message: Message):
 @router.message(Command("cancel"))
 async def cancel_command_handler(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer("Current action cancelled. Use /start for a new question or /genre to set your preferred genre.")
+    await message.answer(
+        "Current action cancelled. Use /start for a new question or /genre to set your preferred genre.",
+        reply_markup=ReplyKeyboardRemove()
+    )
