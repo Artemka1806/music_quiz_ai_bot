@@ -37,7 +37,7 @@ async def genre_command_handler(message: Message, state: FSMContext):
     )
     
     await message.answer(
-        "Please select a music genre for your quiz questions, or choose 'Custom Genre' to enter your own:",
+        "Please select a music genre for your quiz questions, or choose 'Custom Genre' to enter your own:\n\nYou can use /cancel to stop genre selection at any time.",
         reply_markup=keyboard
     )
 
