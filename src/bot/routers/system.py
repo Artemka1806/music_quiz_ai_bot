@@ -111,19 +111,6 @@ async def start_command_handler(message: Message, state: FSMContext, bot: Bot):
     )
 
 
-@router.message(QuizStates.answering)
-async def handle_answer(message: Message, state: FSMContext):
-    data = await state.get_data()
-    correct_answer = data.get("correct_answer")
-    
-    if message.text == correct_answer:
-        await message.answer("✅ Correct! Use /start for a new question or /genre to change the genre.")
-    else:
-        await message.answer(f"❌ Wrong! The correct answer was: {correct_answer}\nUse /start for a new question or /genre to change the genre.")
-    
-    await state.clear()
-
-
 @router.message(Command("support"))
 async def support_command_handler(message: Message):
     await message.answer("Developer: @Artemka1806")
