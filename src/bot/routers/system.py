@@ -1,9 +1,10 @@
 from aiogram import Bot, Router, F
-from aiogram.filters import Command, CommandStart, StateFilter
+from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.chat_action import ChatActionSender
 
 from src.utils.ai import MusicQuizAI
 from src.utils.settings import settings
@@ -79,38 +80,37 @@ async def handle_custom_genre(message: Message, state: FSMContext):
 
 @router.message(CommandStart())
 async def start_command_handler(message: Message, state: FSMContext, bot: Bot):
-    await bot.send_chat_action(message.chat.id, "typing", request_timeout=10)
-    
-    redis = await get_redis()
-    genre = await redis.get(f"user:{message.from_user.id}:genre")
-    
-    quiz_response = await ai.generate_question(genre=genre)
-    correct_answer = next(option.text for option in quiz_response.options if option.is_correct)
-    
-    await state.set_state(QuizStates.answering)
-    await state.update_data(correct_answer=correct_answer)
-    
-    response_text = f"🎵 {quiz_response.question}\n\n"
-    
-    if quiz_response.hint:
-        response_text += f"\n💡 Hint: <tg-spoiler>{quiz_response.hint}</tg-spoiler>"
-    
-    if not genre:
-        response_text += "\n\n📌 Tip: Use /genre to set your preferred music genre!"
-    
-    builder = ReplyKeyboardBuilder()
-    for option in quiz_response.options:
-        builder.add(KeyboardButton(text=option.text))
-    builder.adjust(1)
-    keyboard = builder.as_markup(
-        resize_keyboard=True,
-        input_field_placeholder="Select answer"
-    )
+    async with ChatActionSender.typing(message.chat.id, bot):
+        redis = await get_redis()
+        genre = await redis.get(f"user:{message.from_user.id}:genre")
+        
+        quiz_response = await ai.generate_question(genre=genre)
+        correct_answer = next(option.text for option in quiz_response.options if option.is_correct)
+        
+        await state.set_state(QuizStates.answering)
+        await state.update_data(correct_answer=correct_answer)
+        
+        response_text = f"🎵 {quiz_response.question}\n\n"
+        
+        if quiz_response.hint:
+            response_text += f"\n💡 Hint: <tg-spoiler>{quiz_response.hint}</tg-spoiler>"
+        
+        if not genre:
+            response_text += "\n\n📌 Tip: Use /genre to set your preferred music genre!"
+        
+        builder = ReplyKeyboardBuilder()
+        for option in quiz_response.options:
+            builder.add(KeyboardButton(text=option.text))
+        builder.adjust(1)
+        keyboard = builder.as_markup(
+            resize_keyboard=True,
+            input_field_placeholder="Select answer"
+        )
 
-    await message.answer(
-        text=response_text,
-        reply_markup=keyboard
-    )
+        await message.answer(
+            text=response_text,
+            reply_markup=keyboard
+        )
 
 
 @router.message(Command("support"))
