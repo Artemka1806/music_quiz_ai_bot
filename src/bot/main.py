@@ -6,8 +6,8 @@ from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.enums import ParseMode
 from aiogram.types import BotCommand
 
-from src.bot.routers import ALL_ROUTERS
-from src.utils import settings, get_redis
+from .routers import ALL_ROUTERS
+from utils import settings, get_redis
 
 
 async def main():
@@ -21,7 +21,7 @@ async def main():
 	])
 
     dp = Dispatcher(storage=RedisStorage(await get_redis()))
-    dp.include_router(*ALL_ROUTERS)
+    dp.include_routers(*ALL_ROUTERS)
     await dp.start_polling(
         bot,
         allowed_updates=dp.resolve_used_update_types()

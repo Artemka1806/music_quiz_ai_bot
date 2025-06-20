@@ -3,13 +3,8 @@ version: '3.8'
 services:
   bot:
     build: .
-    environment:
-      - BOT_TOKEN=${BOT_TOKEN}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_USER=${REDIS_USER}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_DB=${REDIS_DB}
+    env_file:
+      - .env
     depends_on:
       - redis
     networks:

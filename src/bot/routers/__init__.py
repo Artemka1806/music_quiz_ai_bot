@@ -4,7 +4,9 @@ __all__ = [
 ]
 
 from .system import router as system_router
+from .quiz import router as quiz_router
 
 ALL_ROUTERS = [
     system_router,
+    quiz_router
 ]

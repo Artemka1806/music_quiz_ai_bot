@@ -5,6 +5,9 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Bot settings
     BOT_TOKEN: SecretStr
+    
+    # AI settings
+    GEMINI_API_KEY: SecretStr
 
     # Redis settings
     REDIS_HOST: str = "redis"
